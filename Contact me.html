@@ -1,22 +1,348 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Contact me</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact Luther</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0d0c;
+      --panel: #111513;
+      --line: #23302a;
+      --text: #d7e2dc;
+      --muted: #7d8f86;
+      --amber: #ffb547;
+      --green: #4dff9a;
+      --red: #ff5d5d;
+      --display: "Chakra Petch", sans-serif;
+      --mono: "IBM Plex Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+      line-height: 1.65;
+      overflow-x: hidden;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 48px 48px;
+      background-position: -1px -1px;
+    }
+    body::before {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse at 50% 30%, transparent 0%, var(--bg) 75%);
+    }
+    body::after {
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px);
+      mix-blend-mode: multiply;
+    }
+    a { color: var(--amber); }
+    ::selection { background: var(--amber); color: var(--bg); }
+
+    .wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      padding: 18px 0; border-bottom: 1px dashed var(--line); font-size: 12px;
+      color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
+    }
+    .topbar a { color: var(--muted); text-decoration: none; transition: color .2s; }
+    .topbar a:hover { color: var(--amber); }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 8px; box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 50% { opacity: .35; } }
+    .cursor { display: inline-block; width: .6em; height: 1.1em; background: var(--green); vertical-align: text-bottom; animation: pulse 1s steps(1) infinite; margin-left: 2px; }
+
+    .rise { opacity: 0; transform: translateY(18px); animation: rise .8s cubic-bezier(.2,.8,.2,1) forwards; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+
+    /* ---------- Heading ---------- */
+    .head { padding: 72px 0 48px; }
+    .tag { display: inline-block; font-size: 12px; color: var(--bg); background: var(--amber); padding: 2px 10px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 18px; }
+    h1 {
+      font-family: var(--display); font-weight: 700;
+      font-size: clamp(44px, 7.5vw, 92px); line-height: .92; text-transform: uppercase;
+    }
+    h1 .outline { color: transparent; -webkit-text-stroke: 1.5px var(--amber); display: block; }
+    .lede { margin-top: 20px; color: var(--muted); max-width: 52ch; }
+
+    /* ---------- Grid ---------- */
+    .grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; align-items: start; }
+    .panel { background: var(--panel); border: 1px solid var(--line); padding: 28px; }
+    .panel-title {
+      display: flex; justify-content: space-between; font-size: 11px; color: var(--muted);
+      letter-spacing: .12em; text-transform: uppercase; padding-bottom: 14px; margin-bottom: 22px;
+      border-bottom: 1px dashed var(--line);
+    }
+    .panel-title b { color: var(--amber); font-weight: 500; }
+
+    /* Form */
+    form { display: grid; gap: 18px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+    label { display: grid; gap: 6px; font-size: 12px; color: var(--muted); letter-spacing: .08em; text-transform: uppercase; }
+    label .err { color: var(--red); text-transform: none; letter-spacing: 0; }
+    input, select, textarea {
+      font: inherit; font-size: 15px; color: var(--text); background: var(--bg);
+      border: 1px solid var(--line); padding: 12px 14px; outline: none; border-radius: 0;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    textarea { resize: vertical; min-height: 150px; }
+    input:focus, select:focus, textarea:focus { border-color: var(--amber); box-shadow: 0 0 0 3px rgba(255,181,71,.15); }
+    .invalid { border-color: var(--red); }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      font: inherit; font-size: 13px; color: var(--muted); background: var(--bg);
+      border: 1px solid var(--line); padding: 6px 14px; cursor: pointer; transition: all .2s;
+    }
+    .chip:hover { color: var(--text); border-color: var(--muted); }
+    .chip.on { color: var(--bg); background: var(--green); border-color: var(--green); }
+    .count { font-size: 11px; color: var(--muted); text-align: right; margin-top: -10px; }
+
+    .btn {
+      justify-self: start; border: 0; cursor: pointer;
+      font-family: var(--display); font-size: 18px; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--bg); background: var(--amber);
+      padding: 14px 36px; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+      transition: background .2s, letter-spacing .3s;
+    }
+    .btn:hover { background: var(--green); letter-spacing: .18em; }
+
+    .sent { text-align: center; padding: 30px 0 10px; }
+    .sent .big { font-family: var(--display); font-size: 64px; color: var(--green); line-height: 1; text-shadow: 0 0 30px rgba(77,255,154,.4); }
+    .sent h3 { font-family: var(--display); font-size: 26px; text-transform: uppercase; margin: 14px 0 6px; }
+    .sent p { color: var(--muted); margin-bottom: 22px; }
+    .link-btn { font: inherit; background: none; border: 0; color: var(--amber); cursor: pointer; text-decoration: underline; }
+
+    /* Side info */
+    .side { display: grid; gap: 24px; }
+    .channel { display: grid; gap: 4px; }
+    .channel .k { font-size: 11px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+    .email { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+    .email a { font-weight: 600; word-break: break-all; text-decoration: none; }
+    .email a:hover { text-decoration: underline; }
+    .copy {
+      font: inherit; font-size: 12px; color: var(--text); background: var(--bg);
+      border: 1px solid var(--line); padding: 4px 10px; cursor: pointer; transition: all .2s;
+    }
+    .copy:hover { border-color: var(--amber); }
+    .copy.done { color: var(--bg); background: var(--green); border-color: var(--green); }
+    .status-list { list-style: none; display: grid; gap: 10px; }
+    .status-list li { display: flex; justify-content: space-between; gap: 12px; border-bottom: 1px dashed var(--line); padding-bottom: 10px; }
+    .status-list li:last-child { border-bottom: 0; padding-bottom: 0; }
+    .status-list span:first-child { color: var(--muted); }
+    .ok { color: var(--green); }
+    .terminal { font-size: 13px; color: var(--green); }
+    .terminal p { white-space: pre-wrap; }
+    .terminal .prompt { color: var(--amber); }
+
+    footer { margin-top: 64px; font-size: 12px; color: var(--muted); text-align: center; }
+
+    @media (max-width: 820px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 520px) {
+      .wrap { padding: 0 16px 60px; }
+      .row { grid-template-columns: 1fr; }
+      .panel { padding: 20px; }
+      .topbar .hide-sm { display: none; }
+      .btn { justify-self: stretch; text-align: center; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .rise { opacity: 1; transform: none; }
+    }
+  </style>
 </head>
 <body>
-    <h1>Contact Details</h1>
-    <p>P68-05 17th 2nd E St Villamor Air Base Pasay City</p>
-    <p>09358381589</p>
-    <p>luthermutyangpili@cwslai.com</p>
+  <div id="root"></div>
 
-    <form action="mailto:luthermutyangpili@cwslai.com" method="post" enctype="text/plain">
-        <label>Your name:</label>
-        <input type="text" name="yourName" value=""><br>
-        <label>Your Email:</label>
-        <input type="email" name="yourEmail" value=""><br>
-        <label>Your message:</label><br>
-        <textarea name="yourMessage" id="" cols="30" rows="10"></textarea><br>
-        <input type="submit">
-    </form>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    // ---- Edit your contact details here ----
+    const CONTACT = {
+      name: "Luther Mutyangpili",
+      email: "luthermutyangpili@gmail.com",
+      company: { name: "CWSLAI", url: "https://cwslai.com" },
+      response: "Within 24 hours",
+    };
+
+    const TOPICS = ["IT Support", "Networking", "Hardware", "Job Offer", "Just saying hi"];
+
+    function useClock() {
+      const [now, setNow] = useState(new Date());
+      useEffect(() => {
+        const t = setInterval(() => setNow(new Date()), 1000);
+        return () => clearInterval(t);
+      }, []);
+      return now;
+    }
+
+    function CopyEmail() {
+      const [copied, setCopied] = useState(false);
+      const copy = async () => {
+        try {
+          await navigator.clipboard.writeText(CONTACT.email);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1800);
+        } catch (e) {
+          window.prompt("Copy this email:", CONTACT.email);
+        }
+      };
+      return (
+        <button className={"copy" + (copied ? " done" : "")} onClick={copy}>
+          {copied ? "✓ copied" : "copy"}
+        </button>
+      );
+    }
+
+    function TicketForm() {
+      const [form, setForm] = useState({ name: "", email: "", topic: TOPICS[0], message: "" });
+      const [errors, setErrors] = useState({});
+      const [sent, setSent] = useState(false);
+      const ticketId = useState(() => "#" + Math.floor(1000 + Math.random() * 9000))[0];
+
+      const set = key => e => setForm({ ...form, [key]: e.target.value });
+
+      const validate = () => {
+        const err = {};
+        if (!form.name.trim()) err.name = "required";
+        if (!/^\S+@\S+\.\S+$/.test(form.email)) err.email = "enter a valid email";
+        if (form.message.trim().length < 10) err.message = "at least 10 characters";
+        setErrors(err);
+        return Object.keys(err).length === 0;
+      };
+
+      const submit = e => {
+        e.preventDefault();
+        if (!validate()) return;
+        const subject = `[${form.topic}] Ticket ${ticketId} from ${form.name}`;
+        const body = `${form.message}\n\n— ${form.name}\n${form.email}`;
+        window.location.href = `mailto:${CONTACT.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        setSent(true);
+      };
+
+      if (sent) {
+        return (
+          <div className="sent">
+            <div className="big">✓</div>
+            <h3>Ticket {ticketId} opened</h3>
+            <p>Your email app should now be open with the message ready — just hit send.</p>
+            <button className="link-btn" onClick={() => setSent(false)}>‹ back to form</button>
+          </div>
+        );
+      }
+
+      return (
+        <form onSubmit={submit} noValidate>
+          <div className="row">
+            <label>
+              <span>Your name {errors.name && <span className="err">— {errors.name}</span>}</span>
+              <input className={errors.name ? "invalid" : ""} value={form.name} onChange={set("name")} placeholder="Juan Dela Cruz" />
+            </label>
+            <label>
+              <span>Your email {errors.email && <span className="err">— {errors.email}</span>}</span>
+              <input type="email" className={errors.email ? "invalid" : ""} value={form.email} onChange={set("email")} placeholder="you@example.com" />
+            </label>
+          </div>
+
+          <label as="div">
+            <span>Topic</span>
+            <div className="chips">
+              {TOPICS.map(t => (
+                <button type="button" key={t} className={"chip" + (form.topic === t ? " on" : "")} onClick={() => setForm({ ...form, topic: t })}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </label>
+
+          <label>
+            <span>Message {errors.message && <span className="err">— {errors.message}</span>}</span>
+            <textarea className={errors.message ? "invalid" : ""} value={form.message} onChange={set("message")} maxLength={1000} placeholder="Describe the issue or what you'd like to talk about..." />
+          </label>
+          <div className="count">{form.message.length} / 1000</div>
+
+          <button className="btn" type="submit">Send ticket ›</button>
+        </form>
+      );
+    }
+
+    function App() {
+      const now = useClock();
+      const time = now.toLocaleTimeString("en-PH", { timeZone: "Asia/Manila", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+
+      return (
+        <div className="wrap">
+          <header className="topbar">
+            <a href="index.html">‹ Back to CV</a>
+            <span className="hide-sm">luther@cwslai:~/contact</span>
+            <span><span className="dot" />Online</span>
+          </header>
+
+          <div className="head">
+            <span className="tag rise" style={{ animationDelay: ".1s" }}>Support desk</span>
+            <h1 className="rise" style={{ animationDelay: ".2s" }}>
+              Open a
+              <span className="outline">ticket</span>
+            </h1>
+            <p className="lede rise" style={{ animationDelay: ".35s" }}>
+              Need IT help, want to talk networking, or have an opportunity in mind?
+              Send a message and I'll get back to you.
+            </p>
+          </div>
+
+          <div className="grid">
+            <div className="panel rise" style={{ animationDelay: ".5s" }}>
+              <div className="panel-title"><span>New ticket</span><b>Priority: normal</b></div>
+              <TicketForm />
+            </div>
+
+            <div className="side">
+              <div className="panel rise" style={{ animationDelay: ".6s" }}>
+                <div className="panel-title"><span>Direct line</span></div>
+                <div className="channel">
+                  <span className="k">Email</span>
+                  <div className="email">
+                    <a href={`mailto:${CONTACT.email}`}>{CONTACT.email}</a>
+                    <CopyEmail />
+                  </div>
+                </div>
+              </div>
+
+              <div className="panel rise" style={{ animationDelay: ".7s" }}>
+                <div className="panel-title"><span>Status</span></div>
+                <ul className="status-list">
+                  <li><span>Availability</span><span className="ok">● Open</span></li>
+                  <li><span>Response time</span><span>{CONTACT.response}</span></li>
+                  <li><span>Local time</span><span>{time} PHT</span></li>
+                  <li><span>Workplace</span><a href={CONTACT.company.url} target="_blank" rel="noopener">{CONTACT.company.name}</a></li>
+                </ul>
+              </div>
+
+              <div className="panel terminal rise" style={{ animationDelay: ".8s" }}>
+                <p><span className="prompt">$</span> ping luther</p>
+                <p>64 bytes from luther: time=fast</p>
+                <p>connection established<span className="cursor" /></p>
+              </div>
+            </div>
+          </div>
+
+          <footer>© {now.getFullYear()} {CONTACT.name} · built with React</footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
 </body>
 </html>
