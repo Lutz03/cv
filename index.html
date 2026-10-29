@@ -1,60 +1,463 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Luther Site</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Luther Mutyangpili</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0b0d0c;
+      --panel: #111513;
+      --line: #23302a;
+      --text: #d7e2dc;
+      --muted: #7d8f86;
+      --amber: #ffb547;
+      --green: #4dff9a;
+      --red: #ff5d5d;
+      --display: "Chakra Petch", sans-serif;
+      --mono: "IBM Plex Mono", monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 15px;
+      line-height: 1.65;
+      overflow-x: hidden;
+      background-image:
+        linear-gradient(var(--line) 1px, transparent 1px),
+        linear-gradient(90deg, var(--line) 1px, transparent 1px);
+      background-size: 48px 48px;
+      background-position: -1px -1px;
+    }
+    body::before {
+      /* vignette over the grid */
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background: radial-gradient(ellipse at 50% 30%, transparent 0%, var(--bg) 75%);
+    }
+    body::after {
+      /* scanlines */
+      content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 50;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,.18) 0 1px, transparent 1px 3px);
+      mix-blend-mode: multiply;
+    }
+    a { color: var(--amber); }
+    ::selection { background: var(--amber); color: var(--bg); }
+
+    /* ---------- Boot ---------- */
+    .boot {
+      position: fixed; inset: 0; z-index: 100; background: var(--bg);
+      padding: 40px 24px; font-size: 14px; color: var(--green);
+      transition: opacity .6s ease, visibility .6s;
+    }
+    .boot.done { opacity: 0; visibility: hidden; }
+    .boot p { white-space: pre; animation: flick .08s steps(2) 2; }
+    .boot .ok { color: var(--amber); }
+    .boot .skip { position: absolute; bottom: 24px; right: 24px; color: var(--muted); background: none; border: 1px solid var(--line); font: inherit; padding: 6px 12px; cursor: pointer; }
+    @keyframes flick { 50% { opacity: .3; } }
+
+    /* ---------- Layout ---------- */
+    .wrap { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+    .topbar {
+      display: flex; justify-content: space-between; align-items: center; gap: 16px;
+      padding: 18px 0; border-bottom: 1px dashed var(--line); font-size: 12px;
+      color: var(--muted); letter-spacing: .08em; text-transform: uppercase;
+    }
+    .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 8px; box-shadow: 0 0 10px var(--green); animation: pulse 2s infinite; }
+    @keyframes pulse { 50% { opacity: .35; } }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      display: grid; grid-template-columns: 300px 1fr; gap: 48px; align-items: center;
+      padding: 80px 0 64px;
+    }
+    .avatar {
+      position: relative; aspect-ratio: 1; border: 1px solid var(--amber);
+      background: var(--panel); overflow: hidden;
+      clip-path: polygon(0 0, 88% 0, 100% 12%, 100% 100%, 12% 100%, 0 88%);
+      transform: rotate(-2deg);
+      transition: transform .4s cubic-bezier(.2,.8,.2,1);
+    }
+    .avatar:hover { transform: rotate(0) scale(1.02); }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; filter: grayscale(.3) contrast(1.1); }
+    .avatar .initials {
+      display: grid; place-items: center; height: 100%;
+      font-family: var(--display); font-size: 110px; color: var(--amber);
+      text-shadow: 0 0 30px rgba(255,181,71,.4);
+    }
+    .avatar::after {
+      content: ""; position: absolute; left: 0; right: 0; height: 30%;
+      background: linear-gradient(transparent, rgba(77,255,154,.18), transparent);
+      animation: sweep 3.5s linear infinite;
+    }
+    @keyframes sweep { from { top: -30%; } to { top: 100%; } }
+    .tag { display: inline-block; font-size: 12px; color: var(--bg); background: var(--amber); padding: 2px 10px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 18px; }
+    h1 {
+      font-family: var(--display); font-weight: 700;
+      font-size: clamp(44px, 7.5vw, 92px); line-height: .92; letter-spacing: -.01em;
+      text-transform: uppercase;
+    }
+    h1 .last { color: transparent; -webkit-text-stroke: 1.5px var(--amber); display: block; }
+    .role { margin-top: 20px; font-size: 17px; color: var(--muted); }
+    .role strong { color: var(--text); font-weight: 600; }
+    .bio { margin-top: 18px; max-width: 58ch; }
+    .cursor { display: inline-block; width: .6em; height: 1.1em; background: var(--green); vertical-align: text-bottom; animation: pulse 1s steps(1) infinite; margin-left: 2px; }
+
+    .rise { opacity: 0; transform: translateY(18px); animation: rise .8s cubic-bezier(.2,.8,.2,1) forwards; }
+    @keyframes rise { to { opacity: 1; transform: none; } }
+
+    /* ---------- Stats strip ---------- */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); background: var(--panel); }
+    .stat { padding: 22px 24px; border-right: 1px solid var(--line); }
+    .stat:last-child { border-right: 0; }
+    .stat .k { font-size: 11px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+    .stat .v { font-family: var(--display); font-size: 30px; color: var(--amber); line-height: 1.2; font-variant-numeric: tabular-nums; }
+    .stat .v small { font-size: 14px; color: var(--muted); margin-left: 2px; }
+
+    /* ---------- Sections ---------- */
+    section { margin-top: 96px; }
+    .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 32px; }
+    .sec-head .idx { font-family: var(--display); color: var(--amber); font-size: 14px; }
+    .sec-head h2 { font-family: var(--display); font-size: clamp(28px, 4vw, 40px); text-transform: uppercase; letter-spacing: .02em; }
+    .sec-head .rule { flex: 1; height: 1px; background: repeating-linear-gradient(90deg, var(--line) 0 6px, transparent 6px 10px); }
+
+    .reveal { opacity: 0; transform: translateY(30px); transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1); }
+    .reveal.in { opacity: 1; transform: none; }
+
+    /* Skills */
+    .skills { display: grid; gap: 14px; }
+    .skill {
+      display: grid; grid-template-columns: 240px 1fr 64px; gap: 20px; align-items: center;
+      padding: 18px 22px; background: var(--panel); border: 1px solid var(--line);
+      transition: border-color .25s, transform .25s;
+    }
+    .skill:hover { border-color: var(--amber); transform: translateX(6px); }
+    .skill .name { font-weight: 500; }
+    .segs { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; }
+    .seg { height: 14px; background: #1a221e; transform: skewX(-20deg); transition: background .3s, box-shadow .3s; }
+    .seg.on { background: var(--green); box-shadow: 0 0 8px rgba(77,255,154,.5); }
+    .seg.on.mid { background: var(--amber); box-shadow: 0 0 8px rgba(255,181,71,.5); }
+    .skill .lv { font-family: var(--display); text-align: right; color: var(--amber); }
+
+    /* Experience */
+    .log { border-left: 2px solid var(--amber); padding-left: 28px; position: relative; }
+    .entry { position: relative; padding: 24px 28px; background: var(--panel); border: 1px solid var(--line); }
+    .entry::before {
+      content: ""; position: absolute; left: -37px; top: 30px; width: 14px; height: 14px;
+      background: var(--bg); border: 2px solid var(--amber); transform: rotate(45deg);
+    }
+    .entry .when { font-size: 12px; color: var(--green); letter-spacing: .1em; text-transform: uppercase; }
+    .entry h3 { font-family: var(--display); font-size: 24px; margin: 4px 0 10px; }
+    .entry ul { list-style: none; display: grid; gap: 6px; }
+    .entry li::before { content: "> "; color: var(--amber); }
+    .live { font-size: 11px; color: var(--bg); background: var(--green); padding: 1px 8px; margin-left: 10px; vertical-align: middle; letter-spacing: .1em; }
+
+    /* Quests */
+    .quests { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .quest {
+      position: relative; padding: 26px 20px 22px; background: var(--panel);
+      border: 1px solid var(--line); overflow: hidden; cursor: default;
+      transition: transform .3s cubic-bezier(.2,.8,.2,1), border-color .3s;
+    }
+    .quest:hover { transform: translateY(-6px); border-color: var(--green); }
+    .quest .icon { font-size: 34px; display: block; margin-bottom: 18px; transition: transform .4s; }
+    .quest:hover .icon { transform: scale(1.2) rotate(-8deg); }
+    .quest .type { font-size: 11px; color: var(--muted); letter-spacing: .12em; text-transform: uppercase; }
+    .quest h4 { font-family: var(--display); font-size: 20px; text-transform: uppercase; }
+    .quest .num { position: absolute; top: 10px; right: 14px; font-family: var(--display); font-size: 48px; color: var(--line); line-height: 1; }
+
+    /* Contact */
+    .contact {
+      margin-top: 110px; padding: 56px 40px; text-align: center;
+      border: 1px solid var(--amber); background:
+        radial-gradient(circle at 50% 120%, rgba(255,181,71,.15), transparent 60%), var(--panel);
+    }
+    .contact p { color: var(--muted); }
+    .contact h2 { font-family: var(--display); font-size: clamp(30px, 5vw, 54px); text-transform: uppercase; margin: 6px 0 28px; }
+    .btn {
+      display: inline-block; font-family: var(--display); font-size: 18px; letter-spacing: .1em;
+      text-transform: uppercase; text-decoration: none; color: var(--bg); background: var(--amber);
+      padding: 14px 36px; clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+      transition: background .2s, letter-spacing .3s;
+    }
+    .btn:hover { background: var(--green); letter-spacing: .18em; }
+    footer { margin-top: 40px; font-size: 12px; color: var(--muted); text-align: center; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 820px) {
+      .hero { grid-template-columns: 1fr; gap: 32px; padding-top: 48px; }
+      .avatar { max-width: 220px; }
+      .quests { grid-template-columns: repeat(2, 1fr); }
+      .skill { grid-template-columns: 1fr 52px; }
+      .skill .segs { grid-column: 1 / -1; grid-row: 2; }
+    }
+    @media (max-width: 520px) {
+      .wrap { padding: 0 16px 60px; }
+      .stats { grid-template-columns: 1fr; }
+      .stat { border-right: 0; border-bottom: 1px solid var(--line); }
+      .topbar .hide-sm { display: none; }
+      .contact { padding: 40px 20px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
+      .rise, .reveal { opacity: 1; transform: none; }
+    }
+  </style>
 </head>
 <body>
-    <table cellspacing="20">
-        <tr>
-            <td><img src="buboy.png" alt="Profile picture"></td>
-            <td><h1>Luther Mutyangpili</h1>
-                <p><em><strong>IT Staff in</strong> <a href="https:\\cwslai.com">CWSLAI.</a></a></em> </p>
-                <p>As a IT Staff I'm responsible for maintaining and supporting the organization's 
-                    computer systems and networks. This can include installing and configuring hardware and 
-                    software, troubleshooting issues, and providing technical support to users.</td>
-        </tr>
-    </table>
-    <hr>
-    <h3>Hobbies</h3>
-    <ul>
-        <li>Basketball</li>
-        <li>Running</li>
-        <li>Workout</li>
-        <li>Playing RPG Games</li>
-    </ul>
-    <hr>
-    <h3>Work Experience</h3>
-    <table cellspacing="10">
-        <tr>
-            <td>2014 - Present</td>
-            <td>IT staff in CWSLAI</td>
-        </tr>
-    </table>
-    <hr>
-    <h3>Skills</h3>
+  <div id="root"></div>
 
-    <table cellspacing="10">
-        <tr>
-            <td>Programming</td>
-            <td>⭐⭐⭐⭐⭐</td>
-        </tr>
-        <tr>
-            <td>Photoshop</td>
-            <td>⭐⭐⭐</td>
-        </tr>
-        <tr>
-            <td>Networking</td>
-            <td>⭐⭐⭐⭐⭐</td>
-        </tr>
-        <tr>
-            <td>Hardware troubleshooting</td>
-            <td>⭐⭐⭐⭐⭐</td>
-        </tr>
-    </table>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.26.4/babel.min.js"></script>
 
-    <hr>
-    <p><a href="Contact me.html">Contact Me</a></p>
-        
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // ---- Edit your CV content here ----
+    const PROFILE = {
+      first: "Luther",
+      last: "Mutyangpili",
+      photo: "buboy.png",
+      role: "IT Staff",
+      company: { name: "CWSLAI", url: "https://cwslai.com" },
+      bio: "As an IT Staff member I'm responsible for maintaining and supporting the organization's computer systems and networks — installing and configuring hardware and software, troubleshooting issues, and providing technical support to users.",
+      since: 2014,
+    };
+
+    const SKILLS = [
+      { name: "Programming", level: 5 },
+      { name: "Networking", level: 5 },
+      { name: "Hardware Troubleshooting", level: 5 },
+      { name: "Photoshop", level: 3 },
+    ];
+
+    const EXPERIENCE = [
+      {
+        when: "2014 — Present",
+        title: "IT Staff · CWSLAI",
+        live: true,
+        points: [
+          "Maintain and support computer systems and networks",
+          "Install and configure hardware and software",
+          "Troubleshoot issues and provide technical support to users",
+        ],
+      },
+    ];
+
+    const HOBBIES = [
+      { icon: "🏀", type: "Team Quest", name: "Basketball" },
+      { icon: "🏃", type: "Endurance", name: "Running" },
+      { icon: "🏋️", type: "Strength", name: "Workout" },
+      { icon: "🎮", type: "Main Story", name: "RPG Games" },
+    ];
+
+    const BOOT_LINES = [
+      "BIOS v2.14 ... memory check 16384K",
+      "Mounting /dev/cv ............... [ OK ]",
+      "Loading profile: luther.mutyangpili",
+      "Starting network services ...... [ OK ]",
+      "Spawning character sheet ....... [ OK ]",
+    ];
+
+    // ---- Components ----
+    function Boot({ onDone }) {
+      const [count, setCount] = useState(0);
+      useEffect(() => {
+        if (count >= BOOT_LINES.length) {
+          const t = setTimeout(onDone, 450);
+          return () => clearTimeout(t);
+        }
+        const t = setTimeout(() => setCount(c => c + 1), 260);
+        return () => clearTimeout(t);
+      }, [count]);
+      return (
+        <div className="boot">
+          {BOOT_LINES.slice(0, count).map((l, i) => (
+            <p key={i}>{l.replace("[ OK ]", "")}{l.includes("[ OK ]") && <span className="ok">[ OK ]</span>}</p>
+          ))}
+          <span className="cursor" />
+          <button className="skip" onClick={onDone}>skip ›</button>
+        </div>
+      );
+    }
+
+    function useReveal() {
+      const ref = useRef(null);
+      const [shown, setShown] = useState(false);
+      useEffect(() => {
+        const io = new IntersectionObserver(([e]) => {
+          if (e.isIntersecting) { setShown(true); io.disconnect(); }
+        }, { threshold: 0.2 });
+        if (ref.current) io.observe(ref.current);
+        return () => io.disconnect();
+      }, []);
+      return [ref, shown];
+    }
+
+    function Section({ idx, title, children }) {
+      const [ref, shown] = useReveal();
+      return (
+        <section ref={ref} className={"reveal" + (shown ? " in" : "")}>
+          <div className="sec-head">
+            <span className="idx">{idx}</span>
+            <h2>{title}</h2>
+            <span className="rule" />
+          </div>
+          {typeof children === "function" ? children(shown) : children}
+        </section>
+      );
+    }
+
+    function Typewriter({ text, start }) {
+      const [n, setN] = useState(0);
+      useEffect(() => {
+        if (!start || n >= text.length) return;
+        const t = setTimeout(() => setN(n + 1), 14);
+        return () => clearTimeout(t);
+      }, [n, start]);
+      return <>{text.slice(0, n)}<span className="cursor" /></>;
+    }
+
+    function Avatar() {
+      const [failed, setFailed] = useState(false);
+      return (
+        <div className="avatar rise" style={{ animationDelay: ".1s" }}>
+          {failed
+            ? <div className="initials">{PROFILE.first[0]}{PROFILE.last[0]}</div>
+            : <img src={PROFILE.photo} alt={`${PROFILE.first} ${PROFILE.last}`} onError={() => setFailed(true)} />}
+        </div>
+      );
+    }
+
+    function Uptime() {
+      const startDate = new Date(PROFILE.since, 0, 1);
+      const [now, setNow] = useState(Date.now());
+      useEffect(() => {
+        const t = setInterval(() => setNow(Date.now()), 1000);
+        return () => clearInterval(t);
+      }, []);
+      const s = Math.floor((now - startDate) / 1000);
+      const years = Math.floor(s / 31557600);
+      const days = Math.floor((s % 31557600) / 86400);
+      const hh = String(Math.floor((s % 86400) / 3600)).padStart(2, "0");
+      const mm = String(Math.floor((s % 3600) / 60)).padStart(2, "0");
+      const ss = String(s % 60).padStart(2, "0");
+      return <>{years}<small>y</small> {days}<small>d</small> {hh}:{mm}:{ss}</>;
+    }
+
+    function SkillBar({ skill, shown, delay }) {
+      const filled = skill.level * 2;
+      return (
+        <div className="skill">
+          <span className="name">{skill.name}</span>
+          <div className="segs">
+            {Array.from({ length: 10 }, (_, i) => (
+              <span
+                key={i}
+                className={"seg" + (shown && i < filled ? " on" : "") + (skill.level < 4 ? " mid" : "")}
+                style={{ transitionDelay: `${delay + i * 60}ms` }}
+              />
+            ))}
+          </div>
+          <span className="lv">LV {skill.level}</span>
+        </div>
+      );
+    }
+
+    function App() {
+      const [booted, setBooted] = useState(false);
+      const avgLevel = (SKILLS.reduce((a, s) => a + s.level, 0) / SKILLS.length).toFixed(1);
+
+      return (
+        <>
+          <div className={"boot-wrap"}>{!booted ? <Boot onDone={() => setBooted(true)} /> : null}</div>
+          <div className="wrap">
+            <header className="topbar">
+              <span><span className="dot" />System online</span>
+              <span className="hide-sm">luther@cwslai:~/cv</span>
+              <span>Lv. {avgLevel} Sysadmin</span>
+            </header>
+
+            {booted && (
+              <>
+                <div className="hero">
+                  <Avatar />
+                  <div>
+                    <span className="tag rise" style={{ animationDelay: ".2s" }}>Player profile</span>
+                    <h1 className="rise" style={{ animationDelay: ".3s" }}>
+                      {PROFILE.first}
+                      <span className="last">{PROFILE.last}</span>
+                    </h1>
+                    <p className="role rise" style={{ animationDelay: ".45s" }}>
+                      <strong>{PROFILE.role}</strong> at{" "}
+                      <a href={PROFILE.company.url} target="_blank" rel="noopener">{PROFILE.company.name}</a>
+                    </p>
+                    <p className="bio rise" style={{ animationDelay: ".6s" }}>
+                      <Typewriter text={PROFILE.bio} start={booted} />
+                    </p>
+                  </div>
+                </div>
+
+                <div className="stats rise" style={{ animationDelay: ".75s" }}>
+                  <div className="stat"><div className="k">Uptime at {PROFILE.company.name}</div><div className="v"><Uptime /></div></div>
+                  <div className="stat"><div className="k">Max-level skills</div><div className="v">{SKILLS.filter(s => s.level === 5).length}<small>/ {SKILLS.length}</small></div></div>
+                  <div className="stat"><div className="k">Status</div><div className="v" style={{ color: "var(--green)" }}>Available</div></div>
+                </div>
+
+                <Section idx="01" title="Skill tree">
+                  {shown => (
+                    <div className="skills">
+                      {SKILLS.map((s, i) => <SkillBar key={s.name} skill={s} shown={shown} delay={i * 150} />)}
+                    </div>
+                  )}
+                </Section>
+
+                <Section idx="02" title="Quest log">
+                  <div className="log">
+                    {EXPERIENCE.map(e => (
+                      <div className="entry" key={e.title}>
+                        <div className="when">{e.when}{e.live && <span className="live">ACTIVE</span>}</div>
+                        <h3>{e.title}</h3>
+                        <ul>{e.points.map(p => <li key={p}>{p}</li>)}</ul>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+
+                <Section idx="03" title="Side quests">
+                  <div className="quests">
+                    {HOBBIES.map((h, i) => (
+                      <div className="quest" key={h.name}>
+                        <span className="num">0{i + 1}</span>
+                        <span className="icon">{h.icon}</span>
+                        <div className="type">{h.type}</div>
+                        <h4>{h.name}</h4>
+                      </div>
+                    ))}
+                  </div>
+                </Section>
+
+                <div className="contact">
+                  <p>// open a support ticket</p>
+                  <h2>Let's connect</h2>
+                  <a className="btn" href="Contact me.html">Contact me</a>
+                </div>
+
+                <footer>© {new Date().getFullYear()} {PROFILE.first} {PROFILE.last} · built with React</footer>
+              </>
+            )}
+          </div>
+        </>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
 </body>
 </html>
